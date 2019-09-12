@@ -1,8 +1,11 @@
 package com.codve.photogallery2;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +30,8 @@ public class PhotoGalleryFragment extends Fragment {
 
     private List<GalleryItem> mItems = new ArrayList<>();
 
+    private CropDownloader<PhotoHolder> mCropDownloader; // Looper
+
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
     }
@@ -36,6 +41,24 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         new FetchItemsTask().execute();
+
+        // 后台下载线程启动
+        Handler responseHandler = new Handler();
+        mCropDownloader = new CropDownloader<>(responseHandler);
+        mCropDownloader.setCropDownloadListener(
+                new CropDownloader.CropDownloadListener<PhotoHolder>() {
+                    @Override
+                    public void onCropDownloaded(PhotoHolder target, Bitmap bitmap) {
+                        Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+                        target.bindDrawable(drawable);
+                    }
+                }
+        );
+
+
+        mCropDownloader.start();
+        mCropDownloader.getLooper();
+        Log.i(TAG, "Background thread started");
     }
 
     @Nullable
@@ -99,6 +122,8 @@ public class PhotoGalleryFragment extends Fragment {
             // 设置占位符
             Drawable placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
             photoHolder.bindDrawable(placeHolder);
+            // 下载缩略图并渲染视图
+            mCropDownloader.queueCrop(photoHolder, galleryItem.getUrl());
         }
 
         @Override
@@ -111,5 +136,19 @@ public class PhotoGalleryFragment extends Fragment {
         if (isAdded()) {
             mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mCropDownloader.clearQueue();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // 视图关闭后, 一定要结束后台线程. 否则后台进程就会成为僵尸
+        mCropDownloader.quit();
+        Log.i(TAG, "Background thread destroyed");
     }
 }
