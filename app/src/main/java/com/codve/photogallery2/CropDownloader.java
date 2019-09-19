@@ -13,22 +13,22 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+
 public class CropDownloader<T> extends HandlerThread {
 
-    // 后台下载线程, 作为 Looper
     private static final String TAG = "CropDownloader";
 
     private static final int MESSAGE_DOWNLOAD = 0;
 
-    private Boolean mQuitFlag = false;
+    private Boolean mQuitFlag = false; // 线程退出标志
 
-    private Handler mRequestHandler;
+    private Handler mRequestHandler; // 发送消息的 Handler
 
     private ConcurrentMap<T, String> mRequestMap = new ConcurrentHashMap<>();
 
-    private Handler mResponseHandler;
+    private Handler mResponseHandler; // 处理消息的 Handler
 
-    private CropDownloadListener<T> mCropDownloadListener;
+    private CropDownloadListener<T> mCropDownloadListener; // 委托的适配器
 
     public CropDownloader(Handler responseHandler) {
         super(TAG);
@@ -68,7 +68,7 @@ public class CropDownloader<T> extends HandlerThread {
     }
 
     // 下载图片
-    // target 实际上是 placeHolder
+    // target 实际上是 ViewHolder
     private void handleRequest(final T target) {
         try {
             final String url = mRequestMap.get(target);

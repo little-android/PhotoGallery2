@@ -6,12 +6,12 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,7 +30,7 @@ public class PhotoGalleryFragment extends Fragment {
 
     private List<GalleryItem> mItems = new ArrayList<>();
 
-    private CropDownloader<PhotoHolder> mCropDownloader; // Looper
+    private CropDownloader<PhotoHolder> mCropDownloader;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -38,6 +38,8 @@ public class PhotoGalleryFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        StrictMode.enableDefaults();
+
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         new FetchItemsTask().execute();
@@ -48,9 +50,9 @@ public class PhotoGalleryFragment extends Fragment {
         mCropDownloader.setCropDownloadListener(
                 new CropDownloader.CropDownloadListener<PhotoHolder>() {
                     @Override
-                    public void onCropDownloaded(PhotoHolder target, Bitmap bitmap) {
+                    public void onCropDownloaded(PhotoHolder photoHolder, Bitmap bitmap) {
                         Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-                        target.bindDrawable(drawable);
+                        photoHolder.bindDrawable(drawable);
                     }
                 }
         );
