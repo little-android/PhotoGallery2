@@ -1,5 +1,6 @@
 package com.codve.photogallery2;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -7,14 +8,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,8 +47,9 @@ public class PhotoGalleryFragment extends Fragment {
         StrictMode.enableDefaults();
 
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         setRetainInstance(true);
-        new FetchItemsTask().execute();
+        updateItems();
 
         // 后台下载线程启动
         Handler responseHandler = new Handler();
@@ -75,9 +82,29 @@ public class PhotoGalleryFragment extends Fragment {
     }
 
     private class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
+        private String mQuery;
+
+        public FetchItemsTask(String query) {
+            mQuery = query;
+        }
+
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
-            return new FlickrFetcher().fetchItems();
+
+            FlickrFetcher fetcher = new FlickrFetcher();
+            List<GalleryItem> items;
+            if (mQuery == null) {
+                items = fetcher.fetchRecentPhotos();
+            } else {
+                items = fetcher.searchPhotos(mQuery);
+            }
+            for (GalleryItem item : items) {
+                String url = item.getUrl();
+                if (url == null || url.length() == 0) {
+                    items.remove(item);
+                }
+            }
+            return items;
         }
 
         @Override
@@ -153,4 +180,46 @@ public class PhotoGalleryFragment extends Fragment {
         mCropDownloader.quit();
         Log.i(TAG, "Background thread destroyed");
     }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_photo_gallery, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.menu_item_search);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, "Query Text Submit: " + query);
+                QueryPrefer.setStoredQuery(getActivity(), query);
+                updateItems();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(TAG, "Query Text Changes: " + newText);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_clear:
+                QueryPrefer.setStoredQuery(getActivity(), null);
+                updateItems();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void updateItems() {
+        String query = QueryPrefer.getStoredQuery(getActivity());
+        new FetchItemsTask(query).execute();
+    }
+
 }
