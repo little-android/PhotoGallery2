@@ -24,6 +24,7 @@ public class Fetcher {
                 out.write(buffer, 0, bytesRead);
             }
             out.close();
+            in.close();
             return out.toByteArray();
         } finally {
             conn.disconnect();

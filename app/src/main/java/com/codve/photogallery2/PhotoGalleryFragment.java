@@ -154,7 +154,7 @@ public class PhotoGalleryFragment extends Fragment {
         public void onBindViewHolder(@NonNull PhotoHolder photoHolder, int position) {
             GalleryItem galleryItem = mGalleryItems.get(position);
             // 设置占位符
-            Drawable placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
+            Drawable placeHolder = getResources().getDrawable(R.drawable.photo_placeholder);
             photoHolder.bindDrawable(placeHolder);
             // 下载缩略图并渲染视图
             mCropDownloader.queueCrop(photoHolder, galleryItem.getUrl());
