@@ -46,7 +46,6 @@ public class CropDownloader<T> extends HandlerThread {
         if (url == null) {
             mRequestMap.remove(target);
         } else {
-            Log.i(TAG, url);
             mRequestMap.put(target, url);
             mRequestHandler.obtainMessage(MESSAGE_DOWNLOAD, target)
                     .sendToTarget();
@@ -76,11 +75,10 @@ public class CropDownloader<T> extends HandlerThread {
                 return;
             }
             // 下载图片字节数据
-            byte[] bitmapBytes = new FlickrFetcher().getUrlBytes(url);
+            byte[] bitmapBytes = new Fetcher().getUrlBytes(url);
             // 将字节转换为 位图
             final Bitmap bitmap = BitmapFactory
                     .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
-            Log.i(TAG, "bit map created");
 
             mResponseHandler.post(new Runnable() {
                 @Override

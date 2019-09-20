@@ -68,7 +68,6 @@ public class PhotoGalleryFragment extends Fragment {
 
         mCropDownloader.start();
         mCropDownloader.getLooper();
-        Log.i(TAG, "Background thread started");
 
         Intent intent = PollService.newIntent(getActivity());
         getActivity().startService(intent);
@@ -97,10 +96,10 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
 
-            FlickrFetcher fetcher = new FlickrFetcher();
+            UnsplashFetcher fetcher = new UnsplashFetcher();
             List<GalleryItem> items;
             if (mQuery == null) {
-                items = fetcher.fetchRecentPhotos();
+                items = fetcher.fetchRandomPhotos();
             } else {
                 items = fetcher.searchPhotos(mQuery);
             }
@@ -184,7 +183,6 @@ public class PhotoGalleryFragment extends Fragment {
         super.onDestroy();
         // 视图关闭后, 一定要结束后台线程. 否则后台进程就会成为僵尸
         mCropDownloader.quit();
-        Log.i(TAG, "Background thread destroyed");
     }
 
     @Override
@@ -197,7 +195,6 @@ public class PhotoGalleryFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d(TAG, "Query Text Submit: " + query);
                 QueryPrefer.setStoredQuery(getActivity(), query);
                 updateItems();
                 return true;
@@ -205,7 +202,6 @@ public class PhotoGalleryFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.d(TAG, "Query Text Changes: " + newText);
                 return false;
             }
         });
