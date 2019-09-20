@@ -1,6 +1,7 @@
 package com.codve.photogallery2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -68,6 +69,11 @@ public class PhotoGalleryFragment extends Fragment {
         mCropDownloader.start();
         mCropDownloader.getLooper();
         Log.i(TAG, "Background thread started");
+
+        Intent intent = PollService.newIntent(getActivity());
+        getActivity().startService(intent);
+
+        PollService.setServiceAlarm(getActivity(), true);
     }
 
     @Nullable
