@@ -70,11 +70,14 @@ public class UnsplashFetcher extends Fetcher {
     private List<GalleryItem> convertUnsplash(List<UnsplashItem> items) {
         List<GalleryItem> galleryItems = new ArrayList<>();
         for (UnsplashItem item : items) {
-            GalleryItem tmp = new GalleryItem();
-            tmp.setCaption(item.getTitle());
-            tmp.setId(item.getId());
-            tmp.setUrl(item.getUrls().getThumb());
-            galleryItems.add(tmp);
+            String url = item.getUrls().getThumb();
+            if (url.length() != 0) { // 过滤 url 为空的图片
+                GalleryItem tmp = new GalleryItem();
+                tmp.setCaption(item.getTitle());
+                tmp.setId(item.getId());
+                tmp.setUrl(url);
+                galleryItems.add(tmp);
+            }
         }
         return galleryItems;
     }

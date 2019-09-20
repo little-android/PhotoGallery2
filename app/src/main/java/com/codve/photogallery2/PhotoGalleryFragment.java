@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,8 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhotoGalleryFragment extends Fragment {
-
-    private static final String TAG = "PhotoGalleryFragment";
 
     private RecyclerView mPhotoRecyclerView;
 
@@ -62,7 +61,6 @@ public class PhotoGalleryFragment extends Fragment {
                 }
         );
 
-
         mCropDownloader.start();
         mCropDownloader.getLooper();
 
@@ -92,7 +90,6 @@ public class PhotoGalleryFragment extends Fragment {
 
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
-
             UnsplashFetcher fetcher = new UnsplashFetcher();
             List<GalleryItem> items;
             if (mQuery == null) {
@@ -116,17 +113,26 @@ public class PhotoGalleryFragment extends Fragment {
         }
     }
 
-    private class PhotoHolder extends RecyclerView.ViewHolder {
+    private class PhotoHolder extends RecyclerView.ViewHolder
+        implements View.OnClickListener{
         private ImageView mItemImageView;
 
         public PhotoHolder(@NonNull View itemView) {
             super(itemView);
             mItemImageView = (ImageView) itemView.findViewById(R.id.item_image_view);
+            itemView.setOnClickListener(this);
         }
 
         // 设置缩略图
         public void bindDrawable(Drawable drawable) {
             mItemImageView.setImageDrawable(drawable);
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = PhotoPageActivity
+                    .newIntent(getActivity(), Uri.parse("https://www.unsplash.com"));
+            startActivity(intent);
         }
     }
 

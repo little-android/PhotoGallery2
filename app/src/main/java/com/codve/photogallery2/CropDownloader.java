@@ -43,7 +43,7 @@ public class CropDownloader<T> extends HandlerThread {
 
     // 把消息添加到后台线程的消息队列中去
     public void queueCrop(T target, String url) {
-        if (url == null) {
+        if (url == null || url.length() == 0) {
             mRequestMap.remove(target);
         } else {
             mRequestMap.put(target, url);
@@ -71,7 +71,7 @@ public class CropDownloader<T> extends HandlerThread {
     private void handleRequest(final T target) {
         try {
             final String url = mRequestMap.get(target);
-            if (url == null) {
+            if (url == null || url.length() == 0) {
                 return;
             }
             // 下载图片字节数据
@@ -83,7 +83,7 @@ public class CropDownloader<T> extends HandlerThread {
             mResponseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (url != null && mRequestMap.get(target).equals(url) && !mQuitFlag) {
+                    if (mRequestMap.get(target).equals(url) && !mQuitFlag) {
                         mRequestMap.remove(target);
                         mCropDownloadListener.onCropDownloaded(target, bitmap);
                     }

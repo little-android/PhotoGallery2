@@ -2,4 +2,6 @@
     <string name="app_name">PhotoGallery2</string>
     <string name="search">Search</string>
     <string name="clear_search">Clear Search</string>
+    <string name="new_pictures_title">new picture</string>
+    <string name="new_pictures_text">you have new pictures</string>
 </resources>
